@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LTBACKEND")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eccebf9ffbe1a7f60ccca2923a1d7cfce0b60fa6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f11f9bde5a4bb88fae4389af0b3578a536e7d4b2")]
 [assembly: System.Reflection.AssemblyProductAttribute("LTBACKEND")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LTBACKEND")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

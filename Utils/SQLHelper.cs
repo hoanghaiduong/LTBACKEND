@@ -1,104 +1,137 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using System.Data;
+using System.Data.Common;
+
 
 namespace LTBACKEND.Utils
 {
-    public class SQLHelper : IDisposable
+    public class SQLHelper
     {
-        private readonly IDbConnection _connection;
+        private readonly DbConnection _connection;
         private readonly ILogger<SQLHelper> _logger;
 
-        public SQLHelper(DatabaseConfig config, ILogger<SQLHelper> logger)
+        public SQLHelper(DbConnection connection, ILogger<SQLHelper> logger)
         {
-            _connection = new SqlConnection(config.ConnectionString);
+            _connection = connection;
             _logger = logger;
         }
 
-        public void Dispose()
+
+
+        private void LogError(Exception ex, string operation)
         {
-            _connection?.Dispose();
+            _logger.LogError(ex, $"{operation} failed: {ex.Message}");
         }
 
-        public async Task<long> InsertAsync<T>(T entity) where T : class
+        public async Task<long> InsertAsync<T>(T entity, IDbTransaction transaction = null) where T : class
         {
             try
             {
-                return await _connection.InsertAsync(entity);
+              
+                return await _connection.InsertAsync(entity, transaction);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Insert failed");
+                LogError(ex, "Insert");
                 return 0;
             }
         }
 
-        public async Task<bool> UpdateAsync<T>(T entity) where T : class
+        public async Task<bool> UpdateAsync<T>(T entity, IDbTransaction transaction = null) where T : class
         {
             try
             {
-                return await _connection.UpdateAsync(entity);
+                if (_connection.State != ConnectionState.Open)
+                    await _connection.OpenAsync();
+
+                return await _connection.UpdateAsync(entity, transaction);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Update failed");
+                LogError(ex, "Update");
                 return false;
             }
         }
 
-        public async Task<bool> DeleteAsync<T>(T entity) where T : class
+        public async Task<bool> DeleteAsync<T>(T entity, IDbTransaction transaction = null) where T : class
         {
             try
             {
-                return await _connection.DeleteAsync(entity);
+             
+                return await _connection.DeleteAsync(entity, transaction);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Delete failed");
+                LogError(ex, "Delete");
                 return false;
             }
         }
 
-        public async Task<DataTable> ExecProcedureAsync(string procedureName, object parameters = null)
+        public async Task<IEnumerable<T>> ExecProcedureAsync<T>(string procedureName, object parameters = null, CancellationToken cancellationToken = default)
         {
             try
             {
-                var reader = await _connection.ExecuteReaderAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
-                var table = new DataTable();
-                table.Load(reader);
-                return table;
+             
+
+                return await _connection.QueryAsync<T>(procedureName, parameters, commandType: CommandType.StoredProcedure);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Stored procedure execution failed");
+                LogError(ex, "Stored procedure execution");
                 throw;
             }
         }
 
-        public async Task<IEnumerable<T>> ExecQueryAsync<T>(string sql, object parameters = null)
+        public async Task<IEnumerable<T>> ExecQueryAsync<T>(string sql, object parameters = null, CancellationToken cancellationToken = default)
         {
             try
             {
+              
+
                 return await _connection.QueryAsync<T>(sql, parameters, commandType: CommandType.Text);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Query execution failed");
+                LogError(ex, "Query execution");
                 throw;
             }
         }
 
-        public async Task<int> ExecNonQueryAsync(string sql, object parameters = null)
+        public async Task<int> ExecNonQueryAsync(string sql, object parameters = null, CancellationToken cancellationToken = default)
         {
             try
             {
+              
                 return await _connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Non-query execution failed");
+                LogError(ex, "Non-query execution");
                 throw;
+            }
+        }
+
+        public async Task<bool> ExecuteInTransactionAsync(Func<IDbTransaction, Task> action)
+        {
+            var transaction = await _connection.BeginTransactionAsync();
+            try
+            {
+                await action(transaction);
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                LogError(ex, "Transaction");
+                return false;
+            }
+            finally
+            {
+                await transaction.DisposeAsync();
             }
         }
     }

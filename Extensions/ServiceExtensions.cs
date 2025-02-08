@@ -1,15 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.DependencyInjection;
+using System.Data.Common;
+using LTBACKEND.Utils;
 namespace LTBACKEND.Extensions
 {
     public static class ServiceExtensions
     {
         public static void ConfigDbContext(this IServiceCollection services, IConfigurationManager configuration)
         {
-         
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<DbConnection>(sp =>
+            {
+                var context = sp.GetRequiredService<ApplicationDbContext>();
+                var connection = context.Database.GetDbConnection();
+                return connection; // Dapper sẽ dùng connection từ EF Core
+            });
+
+            services.AddScoped<SQLHelper>();
+            services.AddControllers();
         }
 
         public static void ConfigureSwagger(this IServiceCollection services)
@@ -21,7 +32,8 @@ namespace LTBACKEND.Extensions
             });
         }
 
-        public static IServiceCollection AddAuth(this IServiceCollection services) {
+        public static IServiceCollection AddAuth(this IServiceCollection services)
+        {
 
             services.AddAuthentication();
             services.AddAuthorization();
