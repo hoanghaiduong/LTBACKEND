@@ -1,4 +1,9 @@
 
+using System;
+using LTBACKEND.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+
 namespace LTBACKEND;
 
 public class Program
@@ -7,12 +12,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-        builder.Services.AddAuthorization();
-
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.ConfigDbContext(builder.Configuration);
+        builder.Services.ConfigureSwagger();
+        builder.Services.ConfigHealthChecks();
+        builder.Services.AddControllers();
 
         var app = builder.Build();
 
@@ -22,10 +25,15 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
+        
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
+
+        app.MapControllers();
+        app.MapHealthChecks("/health");
+        
 
 
         app.Run();
