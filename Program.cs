@@ -1,6 +1,8 @@
 
 using System;
 using LTBACKEND.Extensions;
+using LTBACKEND.Repositories;
+using LTBACKEND.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -15,6 +17,8 @@ public class Program
         builder.Services.ConfigDbContext(builder.Configuration);
         builder.Services.ConfigureSwagger();
         builder.Services.ConfigHealthChecks();
+        builder.Services.AddSingleton<DatabaseConfig>();
+        builder.Services.AddScoped<SQLHelper>();
         builder.Services.AddControllers();
 
         var app = builder.Build();
