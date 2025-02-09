@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data.Common;
 using LTBACKEND.Utils;
+using LTBACKEND.Data;
 namespace LTBACKEND.Extensions
 {
     public static class ServiceExtensions
@@ -12,6 +13,7 @@ namespace LTBACKEND.Extensions
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                    services.AddScoped<ApplicationDbContextInitialize>();
             services.AddScoped<DbConnection>(sp =>
             {
                 var context = sp.GetRequiredService<ApplicationDbContext>();

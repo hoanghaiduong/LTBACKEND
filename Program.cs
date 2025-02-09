@@ -1,6 +1,8 @@
 
 using System;
 using System.Data.Common;
+using System.Threading.Tasks;
+using LTBACKEND.Data;
 using LTBACKEND.Extensions;
 using LTBACKEND.Repositories;
 using LTBACKEND.Utils;
@@ -12,7 +14,7 @@ namespace LTBACKEND;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,7 @@ public class Program
 
 
         var app = builder.Build();
-
+        await app.AddInitialDatabaseAsync();
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {

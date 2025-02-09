@@ -16,7 +16,7 @@ namespace LTBACKEND.Entities
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
         public decimal Amount { get; set; }
 
-
+        public DateTime? PaymentDate { get; set; } = DateTime.Now;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
 
 

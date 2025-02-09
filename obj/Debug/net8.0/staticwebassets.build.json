@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "/31bVsc8IM73367L1COHpBhhNqE6wMhMbQb2ybwmcpc=",
+  "Hash": "KRvb1ApfTbqUqhoFEiM7U/0HmkpIjs30fBry4CZdpFw=",
   "Source": "LTBACKEND",
   "BasePath": "_content/LTBACKEND",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

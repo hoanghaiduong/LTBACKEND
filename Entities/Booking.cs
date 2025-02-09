@@ -21,6 +21,9 @@ namespace LTBACKEND.Entities
         [Required] // CheckOutDate là bắt buộc
         public DateTime CheckOutDate { get; set; }
 
+         [Required] // TotalPrice là bắt buộc
+        public decimal TotalPrice { get; set; }
+
         [Range(minimum: 1, maximum: 3)]
         public EStatus Status { get; set; } = EStatus.Pending; // Mặc định là "Pending"
 
