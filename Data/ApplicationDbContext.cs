@@ -1,10 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Data;
+using System.Reflection;
 using LTBACKEND.Entities;
+using LTBACKEND.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LTBACKEND
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext,IApplicationDbContext
     {
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
@@ -25,5 +27,7 @@ namespace LTBACKEND
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<UserRoles> UserRoles { get; set; }
+
+        public IDbConnection Connection => Database.GetDbConnection();
     }
 }

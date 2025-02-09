@@ -3,65 +3,82 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LTBACKEND.Entities;
+using LTBACKEND.Services;
 using LTBACKEND.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace LTBACKEND.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class RoomTypeController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
-        private readonly SQLHelper _sqlHelper;
+        private readonly RoomTypeService _roomTypeService;
+        private readonly ILogger<RoomTypeController> _logger;
 
-        public RoomTypeController(SQLHelper sqlHelper, ApplicationDbContext dbContext)
+        public RoomTypeController(RoomTypeService roomTypeService, ILogger<RoomTypeController> logger)
         {
-            _sqlHelper = sqlHelper;
-            _dbContext = dbContext;
+            _roomTypeService = roomTypeService;
+            _logger = logger;
         }
 
+        // ✅ Tạo RoomType (201 Created)
+        [HttpPost]
+        public async Task<IResult> CreateRoomType([FromBody] RoomType roomType)
+        {
+            try
+            {
+                var id = await _roomTypeService.CreateRoomType(roomType);
+                if (id == 0)
+                {
+                    return Results.Problem("Failed to create room type.", statusCode: 500);
+                }
+                return Results.Created($"/api/roomtype/{id}", roomType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating RoomType");
+                return Results.Problem("An unexpected error occurred.", statusCode: 500);
+            }
+        }
+
+        // ✅ Lấy RoomType theo ID
+        [HttpGet("{id:int}")]
+        public async Task<IResult> GetRoomTypeById(int id)
+        {
+            var roomType = await _roomTypeService.GetRoomTypeById(id);
+            return roomType == null
+                ? Results.NotFound(new { message = "RoomType not found" })
+                : Results.Ok(roomType);
+        }
+
+        // ✅ Lấy danh sách RoomType (Có phân trang)
         [HttpGet]
-        public async Task<IResult> GetRoomTypes()
+        public async Task<IResult> GetAllRoomTypes([FromQuery] PaginationModel paginationModel)
         {
-            try
-            {
-
-                var roomTypes = await _sqlHelper.ExecQueryAsync<RoomType>("SELECT * FROM RoomTypes");
-
-                return Results.Ok(new
-                {
-                    message = "Success",
-                    data = roomTypes
-                });
-
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var result = await _roomTypeService.GetAllRoomTypes(paginationModel);
+            return Results.Ok(result);
         }
 
-          [HttpGet("Test2")]
-        public async Task<IResult> GetRoomTypes2()
+        // ✅ Cập nhật RoomType (204 No Content)
+        [HttpPut("{id:int}")]
+        public async Task<IResult> UpdateRoomType(int id, [FromBody] RoomType roomType)
         {
-            try
-            {
+            roomType.Id = id;
+            var success = await _roomTypeService.UpdateRoomType(roomType);
+            return success
+                ? Results.NoContent()
+                : Results.NotFound(new { message = "RoomType not found" });
+        }
 
-                var roomTypes = await _dbContext.RoomTypes.ToListAsync();
-
-                return Results.Ok(new
-                {
-                    message = "Success",
-                    data = roomTypes
-                });
-
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+        // ✅ Xóa RoomType (204 No Content)
+        [HttpDelete("{id:int}")]
+        public async Task<IResult> DeleteRoomType(int id)
+        {
+            var success = await _roomTypeService.DeleteRoomType(id);
+            return success
+                ? Results.NoContent()
+                : Results.NotFound(new { message = "RoomType not found" });
         }
     }
 }

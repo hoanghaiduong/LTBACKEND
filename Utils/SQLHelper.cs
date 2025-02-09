@@ -30,7 +30,6 @@ namespace LTBACKEND.Utils
         {
             try
             {
-              
                 return await _connection.InsertAsync(entity, transaction);
             }
             catch (Exception ex)
@@ -60,7 +59,7 @@ namespace LTBACKEND.Utils
         {
             try
             {
-             
+
                 return await _connection.DeleteAsync(entity, transaction);
             }
             catch (Exception ex)
@@ -69,12 +68,24 @@ namespace LTBACKEND.Utils
                 return false;
             }
         }
+        public async Task<SqlMapper.GridReader> ExecProcedureMultipleAsync(string procedureName, object parameters = null)
+        {
+            try
+            {
+                return await _connection.QueryMultipleAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "Stored procedure execution");
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<T>> ExecProcedureAsync<T>(string procedureName, object parameters = null, CancellationToken cancellationToken = default)
         {
             try
             {
-             
+
 
                 return await _connection.QueryAsync<T>(procedureName, parameters, commandType: CommandType.StoredProcedure);
             }
@@ -89,7 +100,7 @@ namespace LTBACKEND.Utils
         {
             try
             {
-              
+
 
                 return await _connection.QueryAsync<T>(sql, parameters, commandType: CommandType.Text);
             }
@@ -104,7 +115,7 @@ namespace LTBACKEND.Utils
         {
             try
             {
-              
+
                 return await _connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
             }
             catch (Exception ex)

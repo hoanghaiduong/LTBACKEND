@@ -22,7 +22,7 @@ public class Program
         builder.Services.ConfigureSwagger();
         builder.Services.ConfigHealthChecks();
 
-
+        builder.Services.AddServices();
         var app = builder.Build();
         await app.AddInitialDatabaseAsync();
         // Configure the HTTP request pipeline.

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Data.Common;
 using LTBACKEND.Utils;
 using LTBACKEND.Data;
+using LTBACKEND.Services;
 namespace LTBACKEND.Extensions
 {
     public static class ServiceExtensions
@@ -13,7 +14,7 @@ namespace LTBACKEND.Extensions
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-                    services.AddScoped<ApplicationDbContextInitialize>();
+            services.AddScoped<ApplicationDbContextInitialize>();
             services.AddScoped<DbConnection>(sp =>
             {
                 var context = sp.GetRequiredService<ApplicationDbContext>();
@@ -40,6 +41,10 @@ namespace LTBACKEND.Extensions
             services.AddAuthentication();
             services.AddAuthorization();
             return services;
+        }
+        public static void AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<RoomTypeService>();
         }
     }
 }
